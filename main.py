@@ -94,10 +94,10 @@ def generate_snake(snake_head, snake_position, apple_position, button_direction,
         
     if snake_head == apple_position:
         apple_position, score = collision_with_apple(apple_position, score)
-        snake_position.insert(0,list(snake_head))
+        snake_position.insert(0, list(snake_head))
 
     else:
-        snake_position.insert(0,list(snake_head))
+        snake_position.insert(0, list(snake_head))
         snake_position.pop()
     
     if is_direction_blocked(snake_position) == 1:
@@ -113,12 +113,12 @@ def display_apple(apple_position):
         pygame.draw.rect(display, red, pygame.Rect(apple_position[0],apple_position[1],10,10))
 
 
-def play_game(snake_head, snake_position, apple_position, button_direction, score):
+def play_game(snake_head, snake_position, apple_position, score):
     crashed = False
     prev_button_direction = 1 # snake can't go back
     button_direction = 1
     
-    button1 = Button(display, 'Click me', 200, 40, (0, 510) ,5)
+    button1 = Button(display, 'Click me', 200, 40, (0, 550) ,5)
     
     while True:
         for event in pygame.event.get(): 
@@ -139,12 +139,13 @@ def play_game(snake_head, snake_position, apple_position, button_direction, scor
                     button_direction = button_direction
     
         snake_position, apple_position, score, crashed = generate_snake(snake_head, snake_position, apple_position, button_direction, score)
-        pygame.display.set_caption("Snake Game"+"  "+"SCORE: " + str(score))
+        print(snake_position)
+        pygame.display.set_caption("Snake Game"+"  "+"Score: " + str(score))
         
         if crashed==True: break;
         
-        display.fill(ground_color, pygame.Rect(0, 0, 500, 500))
-        display.fill(info_color, pygame.Rect(0, 500, 500, 100))
+        display.fill(ground_color, ground_Rect)
+        display.fill(info_color, info_Rect)
         button1.draw()
         display_apple(apple_position)
         display_snake(snake_position)
@@ -158,7 +159,7 @@ def play_game(snake_head, snake_position, apple_position, button_direction, scor
 
 def display_info(score):
     score = 'Score:' + str(score)
-    display.blit(infoText.render(score, True, black), (0, 500))
+    display.blit(infoText.render(score, True, black), (50, 550))
 
 def display_final_score(display_text, final_score):
     TextSurf = finalText.render(display_text, True, black)
@@ -176,28 +177,33 @@ if __name__ == "__main__":
     green = (61,145,64)
     red = (255,0,0)
     black = (0,0,0)
-    
-    # initialize required parameters
     display_width = 500
     display_height = 600
+    info_height = 200
+    ground_Rect = pygame.Rect(0, 0, display_width, display_height-info_height)
+    info_Rect = pygame.Rect(0, display_height-info_height, display_width, info_height)
     ground_color = (200,200,200)
     info_color = (250,235,215)
+    
+    # initialize Font
     infoText = pygame.font.Font('freesansbold.ttf',20)
     finalText = pygame.font.Font('freesansbold.ttf',35)
     buttonText = pygame.font.Font('freesansbold.ttf',30)
-    clock=pygame.time.Clock() 
     
-    snake_head = [250,250]
-    snake_position = [[250,250],[240,250],[230,250]]
+    # initialize snake and apple
+    snake_head = [display_width/2, (display_height-info_height)/2]
+    snake_position = [[snake_head[0], snake_head[0]], [snake_head[0]-10,250],[snake_head[0]-20,250]]
     apple_position = [random.randrange(1,50)*10,random.randrange(1,50)*10]
     snake_score = 0
-
+    
+    # initialize Clock
+    clock=pygame.time.Clock() 
+    
     # display game window
     display = pygame.display.set_mode((display_width,display_height))
-    
-    display.fill(ground_color, pygame.Rect(0, 0, 500, 500))
-    display.fill(info_color, pygame.Rect(0, 500, 500, 100))
-    final_score = play_game(snake_head, snake_position, apple_position, 1, snake_score)
+    display.fill(ground_color, ground_Rect)
+    display.fill(info_color, info_Rect)
+    final_score = play_game(snake_head, snake_position, apple_position, snake_score)
 
     display_text = 'Your Score is: ' + str(final_score)
     display_final_score(display_text, final_score)
