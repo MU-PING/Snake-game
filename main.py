@@ -21,10 +21,12 @@ class Button:
         self.bottom_color = '#354B5E'
 
         # text
-        self.text_surf = buttonText.render(text,True,'#FFFFFF')
+        self.buttonText = pygame.font.Font('freesansbold.ttf',30)
+        self.text_surf = self.buttonText.render(text,True,'#FFFFFF')
         self.text_rect = self.text_surf.get_rect(center = self.top_rect.center)
         
     def draw(self):
+        
         # elevation logic 
         self.top_rect.y = self.original_y_pos - self.dynamic_elecation
         self.text_rect.center = self.top_rect.center 
@@ -32,8 +34,8 @@ class Button:
         self.bottom_rect.midtop = self.top_rect.midtop
         self.bottom_rect.height = self.top_rect.height + self.dynamic_elecation
         
-        pygame.draw.rect(self.display, self.bottom_color, self.bottom_rect,border_radius = 12)
-        pygame.draw.rect(self.display, self.top_color, self.top_rect,border_radius = 12)
+        pygame.draw.rect(self.display, self.bottom_color, self.bottom_rect, border_radius = 12)
+        pygame.draw.rect(self.display, self.top_color, self.top_rect, border_radius = 12)
         self.display.blit(self.text_surf, self.text_rect)
         self.check_click()
         
@@ -51,162 +53,166 @@ class Button:
         else:
             self.dynamic_elecation = self.elevation
             self.top_color = '#475F77'
-   
-def collision_with_apple(apple_position, score):#如果與蘋果碰撞，產生新的蘋果，並分數加1
-    apple_position = [random.randrange(1,50)*10,random.randrange(1,50)*10]
-    score += 1
-    return apple_position, score
-
-def collision_with_boundaries(snake_head): #判斷是否與邊界
-    if snake_head[0]>=500 or snake_head[0]<0 or snake_head[1]>=500 or snake_head[1]<0 :
-        return 1
-    else:
-        return 0
-
-def collision_with_self(snake_position): #判斷是否與自己碰撞
-    snake_head = snake_position[0]
-    if snake_head in snake_position[1:]:
-        return 1
-    else:
-        return 0
-    
-
-def is_direction_blocked(snake_position):#判斷是否死亡
-    snake_head = snake_position[0]
-    if collision_with_boundaries(snake_head) == 1 or collision_with_self(snake_position) == 1:
-        return 1
-    else:
-        return 0
-
-def generate_snake(snake_head, snake_position, apple_position, button_direction, score):
-    crashed = False
-    
-    if button_direction == 1:
-        snake_head[0] += 10
-    elif button_direction == 0:
-        snake_head[0] -= 10
-    elif button_direction == 2:
-        snake_head[1] += 10
-    elif button_direction == 3:
-        snake_head[1] -= 10
-    else:
-        pass
-        
-    if snake_head == apple_position:
-        apple_position, score = collision_with_apple(apple_position, score)
-        snake_position.insert(0, list(snake_head))
-
-    else:
-        snake_position.insert(0, list(snake_head))
-        snake_position.pop()
-    
-    if is_direction_blocked(snake_position) == 1:
-            crashed = True
             
-    return snake_position, apple_position, score, crashed
-
-def display_snake(snake_position):
-    for position in snake_position:
-        pygame.draw.rect(display, green, pygame.Rect(position[0],position[1],10,10))
-
-def display_apple(apple_position):
-        pygame.draw.rect(display, red, pygame.Rect(apple_position[0],apple_position[1],10,10))
-
-
-def play_game(snake_head, snake_position, apple_position, score):
-    crashed = False
-    prev_button_direction = 1 # snake can't go back
-    button_direction = 1
+class Frames():
     
-    button1 = Button(display, 'Click me', 200, 40, (0, 550) ,5)
-    
-    while True:
-        for event in pygame.event.get(): 
-            if event.type == pygame.QUIT:
-                pygame.quit()               # close window
-                sys.exit()                  # close program
-             
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT and prev_button_direction != 1:
-                    button_direction = 0
-                elif event.key == pygame.K_RIGHT and prev_button_direction != 0:
-                    button_direction = 1
-                elif event.key == pygame.K_UP and prev_button_direction != 2:
-                    button_direction = 3
-                elif event.key == pygame.K_DOWN and prev_button_direction != 3:
-                    button_direction = 2
-                else:
-                    button_direction = button_direction
-    
-        snake_position, apple_position, score, crashed = generate_snake(snake_head, snake_position, apple_position, button_direction, score)
-        print(snake_position)
-        pygame.display.set_caption("Snake Game"+"  "+"Score: " + str(score))
+    def __init__(self, snake_position, apple_position):
         
-        if crashed==True: break;
+        self.snake_position = snake_position
+        self.apple_position = apple_position
+        self.crashed = False
+        self.score = 0
         
-        display.fill(ground_color, ground_Rect)
-        display.fill(info_color, info_Rect)
+        # direction
+        self.prev_button_direction = 1 
+        self.button_direction = 1
+        
+class Snake_Game():
+    
+    def __init__(self, display, display_width, display_height, info_height):
+        
+        # initialize const 
+        self.green = (61,145,64)
+        self.red = (255,0,0)
+        self.black = (0,0,0)
+        self.ground_color = (200,200,200)
+        self.info_color = (250,235,215)
+        
+        self.display = display
+        self.display_width = display_width
+        self.display_height = display_height
+        self.info_height = info_height
+        self.game_height = display_height - info_height
+        self.game_width_index = display_width/10
+        self.game_height_index = self.game_height/10
+        self.ground_Rect = pygame.Rect(0, 0, display_width, self.game_height)
+        self.info_Rect = pygame.Rect(0, self.game_height, display_width, info_height)
+
+        # initialize Font
+        self.infoText = pygame.font.Font('freesansbold.ttf',20)
+        self.finalText = pygame.font.Font('freesansbold.ttf',35)
+        
+        self.display.fill(self.ground_color, self.ground_Rect)
+        self.display.fill(self.info_color, self.info_Rect)
+
+        
+    def play(self):
+        
+        # initialize snake and apple
+        snake_head = [self.display_width/2, (self.display_height-self.info_height)/2]
+        snake_position = [snake_head, [snake_head[0]-10,250],[snake_head[0]-20,250]]
+        apple_position = self.generate_apple()
+        frames = Frames(snake_position, apple_position)
+        
+        button1 = Button(display, 'Click me', 200, 40, (0, 550) ,5)
         button1.draw()
-        display_apple(apple_position)
-        display_snake(snake_position)
-        display_info(score)
+        
+        # frame
+        while True:
+            for event in pygame.event.get(): 
+                if event.type == pygame.QUIT:
+                    pygame.quit()               # close window
+                    sys.exit()                  # close program
+                 
+                # snake can't go back
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT and frames.prev_button_direction != 1:
+                        frames.button_direction = 0
+                        
+                    elif event.key == pygame.K_RIGHT and frames.prev_button_direction != 0:
+                        frames.button_direction = 1
+                        
+                    elif event.key == pygame.K_UP and frames.prev_button_direction != 2:
+                        frames.button_direction = 3
+                        
+                    elif event.key == pygame.K_DOWN and frames.prev_button_direction != 3:
+                        frames.button_direction = 2
+        
+                    frames.prev_button_direction = frames.button_direction
+                    
+            self.generate_snake(frames)
+            pygame.display.set_caption("Snake Game"+"  "+"Score: " + str(frames.score))
+            
+            if frames.crashed==True: break;
+              
+            self.display.fill(self.ground_color, self.ground_Rect)
+            self.display.fill(self.info_color, self.info_Rect)
+            self.display_apple(frames.apple_position)
+            self.display_snake(frames.snake_position)
+            self.display_info(frames.score)
+            
+            pygame.display.update()
+            
+            clock.tick(15)
+
+    def generate_snake(self, frames):
+        
+        snake_head = frames.snake_position[0].copy()
+        
+        if frames.button_direction == 1:
+            snake_head[0] += 10
+        elif frames.button_direction == 0:
+            snake_head[0] -= 10
+        elif frames.button_direction == 2:
+            snake_head[1] += 10
+        elif frames.button_direction == 3:
+            snake_head[1] -= 10
+           
+        # collision with apple -----------------------
+        if snake_head == frames.apple_position:
+            frames.apple_position = self.generate_apple()
+            frames.snake_position.insert(0, list(snake_head))
+            frames.score += 1
+    
+        else:
+            frames.snake_position.insert(0, list(snake_head))
+            frames.snake_position.pop()
+        
+        # collision with boundaries ----------------------------
+        if snake_head[0] >= self.display_width or snake_head[0] < 0 or snake_head[1] >= self.game_height or snake_head[1] < 0:
+            frames.crashed = True
+            
+        # collision with self ----------------------------
+        if snake_head in frames.snake_position[1:]:
+            frames.crashed = True
+
+    def generate_apple(self):
+        return [random.randrange(1, self.game_width_index)*10, random.randrange(1, self.game_height_index)*10]
+        
+    def display_snake(self, snake_position):
+        for position in snake_position:
+            pygame.draw.rect(display, self.green, pygame.Rect(position[0],position[1], 10, 10))
+    
+    def display_apple(self, apple_position):
+            pygame.draw.rect(display, self.red, pygame.Rect(apple_position[0],apple_position[1], 10, 10))
+    
+    def display_info(self, score):
+        score = 'Score:' + str(score)
+        display.blit(self.infoText.render(score, True, self.black), (50, 550))
+    
+    def display_final_score(self, display_text, final_score):
+        TextSurf = self.finalText.render(display_text, True, self.black)
+        TextRect = TextSurf.get_rect()
+        TextRect.center = ((self.display_width/2),(self.display_height/2))
+        display.blit(TextSurf, TextRect)
         pygame.display.update()
-        prev_button_direction = button_direction
-        
-        clock.tick(20)
-        
-    return score
-
-def display_info(score):
-    score = 'Score:' + str(score)
-    display.blit(infoText.render(score, True, black), (50, 550))
-
-def display_final_score(display_text, final_score):
-    TextSurf = finalText.render(display_text, True, black)
-    TextRect = TextSurf.get_rect()
-    TextRect.center = ((display_width/2),(display_height/2))
-    display.blit(TextSurf, TextRect)
-    pygame.display.update()
     
 if __name__ == "__main__":
     
     #initialize pygame modules   
     pygame.init() 
     
-    # initialize const 
-    green = (61,145,64)
-    red = (255,0,0)
-    black = (0,0,0)
-    display_width = 500
-    display_height = 600
-    info_height = 200
-    ground_Rect = pygame.Rect(0, 0, display_width, display_height-info_height)
-    info_Rect = pygame.Rect(0, display_height-info_height, display_width, info_height)
-    ground_color = (200,200,200)
-    info_color = (250,235,215)
-    
-    # initialize Font
-    infoText = pygame.font.Font('freesansbold.ttf',20)
-    finalText = pygame.font.Font('freesansbold.ttf',35)
-    buttonText = pygame.font.Font('freesansbold.ttf',30)
-    
-    # initialize snake and apple
-    snake_head = [display_width/2, (display_height-info_height)/2]
-    snake_position = [[snake_head[0], snake_head[0]], [snake_head[0]-10,250],[snake_head[0]-20,250]]
-    apple_position = [random.randrange(1,50)*10,random.randrange(1,50)*10]
-    snake_score = 0
-    
     # initialize Clock
-    clock=pygame.time.Clock() 
+    clock= pygame.time.Clock() 
     
     # display game window
-    display = pygame.display.set_mode((display_width,display_height))
-    display.fill(ground_color, ground_Rect)
-    display.fill(info_color, info_Rect)
-    final_score = play_game(snake_head, snake_position, apple_position, snake_score)
+    display_width = 500
+    display_height = 600
+    info_height = 100
+    display = pygame.display.set_mode((display_width, display_height))
 
-    display_text = 'Your Score is: ' + str(final_score)
-    display_final_score(display_text, final_score)
+    game = Snake_Game(display, display_width, display_height, info_height)
+    game.play()
 
     while True:
         for event in pygame.event.get():
