@@ -21,7 +21,7 @@ class Button:
         self.bottom_color = '#354B5E'
 
         # text
-        self.buttonText = pygame.font.Font('freesansbold.ttf',30)
+        self.buttonText = pygame.font.Font('freesansbold.ttf', 20)
         self.text_surf = self.buttonText.render(text,True,'#FFFFFF')
         self.text_rect = self.text_surf.get_rect(center = self.top_rect.center)
         
@@ -95,17 +95,27 @@ class Snake_Game():
         self.display.fill(self.ground_color, self.ground_Rect)
         self.display.fill(self.info_color, self.info_Rect)
 
+        # initialize Button
+        #self.start = Button(self.display, 'Start', 20, (game_height+info_height/2), (0, 510) ,5)
         
     def play(self):
         
         # initialize snake and apple
-        snake_head = [self.display_width/2, (self.display_height-self.info_height)/2]
-        snake_position = [snake_head, [snake_head[0]-10,250],[snake_head[0]-20,250]]
+        startX = self.display_width/2
+        startY = (self.display_height-self.info_height)/2
+        snake_head = [startX, startY]
+        snake_position = [snake_head, [startX-10, startY],[startX-20, startY]]
         apple_position = self.generate_apple()
         frames = Frames(snake_position, apple_position)
         
-        button1 = Button(display, 'Click me', 200, 40, (0, 550) ,5)
-        button1.draw()
+        buttonHeight = 30
+        pos = (self.info_height - 2 * buttonHeight)/3
+        start_button = Button(self.display, 'Start Game', 200, 30, (20, self.game_height + pos) ,5)
+        level_button = Button(self.display, 'Choose Level', 200, 30, (20, self.game_height + 2*pos + buttonHeight) ,5)
+        start_button.draw() 
+        level_button.draw() 
+        pygame.display.update()
+        pygame.time.delay(1000)
         
         # frame
         while True:
@@ -207,8 +217,8 @@ if __name__ == "__main__":
     
     # display game window
     display_width = 500
-    display_height = 600
-    info_height = 100
+    display_height = 800
+    info_height = 120
     display = pygame.display.set_mode((display_width, display_height))
 
     game = Snake_Game(display, display_width, display_height, info_height)
