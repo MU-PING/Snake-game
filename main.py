@@ -71,12 +71,10 @@ class Snake_Game():
     
     def __init__(self, display, display_width, display_height, info_height):
         
-        # initialize const 
-        self.green = (61,145,64)
-        self.red = (255,0,0)
-        self.black = (0,0,0)
-        self.ground_color = (200,200,200)
-        self.info_color = (250,235,215)
+        # Const 
+        self.green = (61, 145, 64)
+        self.red = (255, 0, 0)
+        self.black = (0, 0, 0)
         
         self.display = display
         self.display_width = display_width
@@ -85,19 +83,41 @@ class Snake_Game():
         self.game_height = display_height - info_height
         self.game_width_index = display_width/10
         self.game_height_index = self.game_height/10
-        self.ground_Rect = pygame.Rect(0, 0, display_width, self.game_height)
-        self.info_Rect = pygame.Rect(0, self.game_height, display_width, info_height)
 
-        # initialize Font
-        self.infoText = pygame.font.Font('freesansbold.ttf',20)
+        # Font
         self.finalText = pygame.font.Font('freesansbold.ttf',35)
         
-        self.display.fill(self.ground_color, self.ground_Rect)
-        self.display.fill(self.info_color, self.info_Rect)
-
-        # initialize Button
-        #self.start = Button(self.display, 'Start', 20, (game_height+info_height/2), (0, 510) ,5)
+        # Image
+        self.GrassUI = pygame.image.load("Icon//GrassUI.png")
+        self.GrassUI.convert() # Increase drawing speed
+        self.SnakeUI = pygame.image.load("Icon//SnakeUI.jpeg")
+        self.SnakeUI.convert() # Increase drawing speed
+        self.SnakeUI = pygame.transform.scale(self.SnakeUI, (display_width, info_height))
         
+        # Button
+        self.buttonWidth = 200
+        self.buttonHeight = 30
+        self.pos = (info_height - 2 * self.buttonHeight)/3
+        self.start_button = Button(self.display, 'Start Game', self.buttonWidth, self.buttonHeight, (50, self.game_height + self.pos) ,5)
+        self.level_button = Button(self.display, 'Choose Level', self.buttonWidth, self.buttonHeight, (50, self.game_height + 2*self.pos + self.buttonHeight) ,5)
+
+        self.mainUI()
+        
+    def mainUI(self):
+    
+        # frame
+        while True:
+            for event in pygame.event.get(): 
+                if event.type == pygame.QUIT:
+                    pygame.quit()               # close window
+                    sys.exit()                  # close program
+            
+            self.display_background()
+            self.start_button.draw() 
+            self.level_button.draw()   
+            pygame.display.update()
+            clock.tick(20)
+            
     def play(self):
         
         # initialize snake and apple
@@ -107,15 +127,6 @@ class Snake_Game():
         snake_position = [snake_head, [startX-10, startY],[startX-20, startY]]
         apple_position = self.generate_apple()
         frames = Frames(snake_position, apple_position)
-        
-        buttonHeight = 30
-        pos = (self.info_height - 2 * buttonHeight)/3
-        start_button = Button(self.display, 'Start Game', 200, 30, (20, self.game_height + pos) ,5)
-        level_button = Button(self.display, 'Choose Level', 200, 30, (20, self.game_height + 2*pos + buttonHeight) ,5)
-        start_button.draw() 
-        level_button.draw() 
-        pygame.display.update()
-        pygame.time.delay(1000)
         
         # frame
         while True:
@@ -145,16 +156,14 @@ class Snake_Game():
             
             if frames.crashed==True: break;
               
-            self.display.fill(self.ground_color, self.ground_Rect)
-            self.display.fill(self.info_color, self.info_Rect)
-            self.display_apple(frames.apple_position)
             self.display_snake(frames.snake_position)
+            self.display_apple(frames.apple_position)
             self.display_info(frames.score)
             
             pygame.display.update()
             
             clock.tick(15)
-
+    
     def generate_snake(self, frames):
         
         snake_head = frames.snake_position[0].copy()
@@ -195,11 +204,11 @@ class Snake_Game():
     
     def display_apple(self, apple_position):
             pygame.draw.rect(display, self.red, pygame.Rect(apple_position[0],apple_position[1], 10, 10))
-    
-    def display_info(self, score):
-        score = 'Score:' + str(score)
-        display.blit(self.infoText.render(score, True, self.black), (50, 550))
-    
+        
+    def display_background(self):
+        self.display.blit(self.GrassUI, (0, 0))
+        self.display.blit(self.SnakeUI, (0, self.game_height))
+            
     def display_final_score(self, display_text, final_score):
         TextSurf = self.finalText.render(display_text, True, self.black)
         TextRect = TextSurf.get_rect()
@@ -216,16 +225,8 @@ if __name__ == "__main__":
     clock= pygame.time.Clock() 
     
     # display game window
-    display_width = 500
-    display_height = 800
-    info_height = 120
+    display_width = 400
+    display_height = 620
+    info_height = 130
     display = pygame.display.set_mode((display_width, display_height))
-
     game = Snake_Game(display, display_width, display_height, info_height)
-    game.play()
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()               # close window
-                sys.exit()                  # close program
