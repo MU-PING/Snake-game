@@ -81,6 +81,7 @@ class Snake_Game():
         self.green = (227, 229, 132)
         self.red = (255, 0, 0)
         self.black = (0, 0, 0)
+        self.white = (255, 255, 255)
         
         self.display = display
         self.display_width = display_width
@@ -89,11 +90,15 @@ class Snake_Game():
         self.game_height = display_height - info_height
         self.game_width_index = display_width/10
         self.game_height_index = self.game_height/10
-        self.levelIndex = 0
-        self.levels = ["Easy", "Medium", "Hard"]
+        
+        self.speedIndex = 0
+        self.speeds = ["Slow", "Medium", "Fast"]
+        
+        self.mapIndex = 0
+        self.maps = ["Easy", "Medium", "Hard"]
         
         # Font
-        self.infoText = pygame.font.Font('freesansbold.ttf', 15)
+        self.infoText = pygame.font.Font('freesansbold.ttf', 20)
         self.finalText = pygame.font.Font('freesansbold.ttf', 35)
         
         # Image
@@ -120,13 +125,20 @@ class Snake_Game():
         self.AppleUI = pygame.transform.scale(self.AppleUI, (20, 20))
         
         # Button
-        self.buttonWidth = 75
+        self.buttonWidth = 80
         self.buttonHeight = 28
-        self.pos = (info_height - 2 * self.buttonHeight)/5
-        self.start_button = Button(self.display, 'START', self.buttonWidth, self.buttonHeight, (20, self.game_height + self.pos) ,5, [self.play])
-        self.level_button = Button(self.display, 'LEVEL', self.buttonWidth, self.buttonHeight, (20, self.game_height + 2*self.pos + self.buttonHeight) ,5, [self.change_level])
-        self.map_button = Button(self.display, 'MAP', self.buttonWidth, self.buttonHeight, (20, self.game_height + 3*self.pos + 2*self.buttonHeight) ,5, [self.change_level])
+        self.pos = (info_height - 2 * self.buttonHeight) / 5
+        self.start_position = (20, self.game_height + self.pos)
+        self.level_position = (20, self.game_height + 2*self.pos + self.buttonHeight)
+        self.map_position = (20, self.game_height + 3*self.pos + 2*self.buttonHeight)
+        self.start_button = Button(self.display, 'START', self.buttonWidth, self.buttonHeight, self.start_position, 5, [self.play])
+        self.level_button = Button(self.display, 'SPEED', self.buttonWidth, self.buttonHeight, self.level_position, 5, [self.change_speed])
+        self.map_button = Button(self.display, 'MAP', self.buttonWidth, self.buttonHeight, self.map_position, 5, [self.change_map])
 
+        # Text Position
+        self.score_position = (40 + self.buttonWidth, self.start_position[1])
+        self.speed_position = (40 + self.buttonWidth, self.level_position[1])
+        self.map_position = (40 + self.buttonWidth, self.map_position[1])
         self.mainUI()
         
     def mainUI(self):
@@ -142,7 +154,7 @@ class Snake_Game():
             self.start_button.draw() 
             self.level_button.draw()
             self.map_button.draw()
-            self.display_level()
+            self.display_info()
             pygame.display.update()
             
             
@@ -180,13 +192,11 @@ class Snake_Game():
                     frames.prev_button_direction = frames.button_direction
                     
             self.generate_snake(frames)
-            pygame.display.set_caption("Snake Game v1.0"+"  "+"Score: " + str(frames.score))
-            
             if frames.crashed==True: break;
             self.display_background()
             self.display_snake(frames.snake_position)
             self.display_apple(frames.apple_position)
-            
+            self.display_info()
             pygame.display.update()
             
             clock.tick(20)
@@ -244,23 +254,35 @@ class Snake_Game():
         self.display.blit(self.Tree1UI, (380, 130))
         self.display.blit(self.Tree2UI, (120, 290))
 
-    def display_info(self, time, score):
-        pass
+    def display_info(self):
         
-    def display_level(self):
-        TextSurf = self.infoText.render(self.levels[self.levelIndex], True, self.black)
+        # display score
+        TextSurf = self.infoText.render("Score:  " + "0", True, self.white)
         TextRect = TextSurf.get_rect()
-        display.blit(TextSurf, TextRect)
-
+        self.display.blit(TextSurf, self.score_position)
+        
+        # display speed
+        TextSurf = self.infoText.render("Speed:  " + self.speeds[self.speedIndex], True, self.white)
+        TextRect = TextSurf.get_rect()
+        self.display.blit(TextSurf, self.speed_position)
+        
+        # display map
+        TextSurf = self.infoText.render("Map:  " + self.maps[self.mapIndex], True, self.white)
+        TextRect = TextSurf.get_rect()
+        self.display.blit(TextSurf, self.map_position)
+        
     def display_final_score(self, display_text, final_score):
         TextSurf = self.finalText.render(display_text, True, self.black)
         TextRect = TextSurf.get_rect()
         TextRect.center = ((self.display_width/2),(self.display_height/2))
-        display.blit(TextSurf, TextRect)
+        self.display.blit(TextSurf, TextRect)
         pygame.display.update()
         
-    def change_level(self):
-        self.levelIndex = (self.levelIndex + 1) % 3
+    def change_speed(self):
+        self.speedIndex = (self.speedIndex + 1) % 3    
+            
+    def change_map(self):
+        self.mapIndex = (self.mapIndex + 1) % 3
         
 if __name__ == "__main__":
     
