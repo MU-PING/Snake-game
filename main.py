@@ -79,7 +79,6 @@ class Snake_Game():
         
         # Const 
         self.green = (227, 229, 132)
-        self.red = (255, 0, 0)
         self.black = (0, 0, 0)
         self.white = (255, 255, 255)
         
@@ -99,7 +98,7 @@ class Snake_Game():
         
         # Font
         self.infoText = pygame.font.Font('freesansbold.ttf', 20)
-        self.finalText = pygame.font.Font('freesansbold.ttf', 35)
+        self.finalText = pygame.font.Font('freesansbold.ttf', 64)
         
         # Image
         self.GrassUI = pygame.image.load("Icon//GrassUI.png")
@@ -131,7 +130,7 @@ class Snake_Game():
         self.start_position = (20, self.game_height + self.pos)
         self.level_position = (20, self.game_height + 2*self.pos + self.buttonHeight)
         self.map_position = (20, self.game_height + 3*self.pos + 2*self.buttonHeight)
-        self.start_button = Button(self.display, 'START', self.buttonWidth, self.buttonHeight, self.start_position, 5, [self.play])
+        self.start_button = Button(self.display, 'START', self.buttonWidth, self.buttonHeight, self.start_position, 5, [self.countdown])
         self.level_button = Button(self.display, 'SPEED', self.buttonWidth, self.buttonHeight, self.level_position, 5, [self.change_speed])
         self.map_button = Button(self.display, 'MAP', self.buttonWidth, self.buttonHeight, self.map_position, 5, [self.change_map])
 
@@ -155,9 +154,41 @@ class Snake_Game():
             self.level_button.draw()
             self.map_button.draw()
             self.display_info()
+            
             pygame.display.update()
             
+    def countdown(self):
+        
+        # frame
+        time = 0
+        num = 3
+        countdown = str(num)
+        
+        while True:
+            for event in pygame.event.get(): 
+                if event.type == pygame.QUIT:
+                    pygame.quit()               # close window
+                    sys.exit()                  # close program
+              
+            self.display_background()
+            self.display_info()
             
+            if(time % 250 < 250):
+                self.display_text(countdown)
+                time += 1  
+                
+            if(time % 250 == 0):
+                if(countdown == "Game Start"):
+                    break
+                num -= 1
+                countdown = str(num)
+                if(num == 0):
+                    countdown = "Game Start"
+                
+            pygame.display.update()
+            
+        self.play()
+        
     def play(self):
         
         # initialize snake and apple
@@ -197,8 +228,8 @@ class Snake_Game():
             self.display_snake(frames.snake_position)
             self.display_apple(frames.apple_position)
             self.display_info()
-            pygame.display.update()
             
+            pygame.display.update()
             clock.tick(20)
     
     def generate_snake(self, frames):
@@ -258,25 +289,21 @@ class Snake_Game():
         
         # display score
         TextSurf = self.infoText.render("Score:  " + "0", True, self.white)
-        TextRect = TextSurf.get_rect()
         self.display.blit(TextSurf, self.score_position)
         
         # display speed
         TextSurf = self.infoText.render("Speed:  " + self.speeds[self.speedIndex], True, self.white)
-        TextRect = TextSurf.get_rect()
         self.display.blit(TextSurf, self.speed_position)
         
         # display map
         TextSurf = self.infoText.render("Map:  " + self.maps[self.mapIndex], True, self.white)
-        TextRect = TextSurf.get_rect()
         self.display.blit(TextSurf, self.map_position)
         
-    def display_final_score(self, display_text, final_score):
-        TextSurf = self.finalText.render(display_text, True, self.black)
+    def display_text(self, display_text):
+        TextSurf = self.finalText.render(display_text, True, self.white)
         TextRect = TextSurf.get_rect()
-        TextRect.center = ((self.display_width/2),(self.display_height/2))
+        TextRect.center = ((self.display_width/2),(self.game_height/2))
         self.display.blit(TextSurf, TextRect)
-        pygame.display.update()
         
     def change_speed(self):
         self.speedIndex = (self.speedIndex + 1) % 3    
