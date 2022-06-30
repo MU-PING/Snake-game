@@ -84,14 +84,14 @@ class Snake_Game():
         self.display = display
         self.display_width = display_width
         self.game_height = display_height - info_height
-        self.game_width_index = display_width/10
-        self.game_height_index = self.game_height/10
+        self.game_width_index = display_width/10 -1 
+        self.game_height_index = self.game_height/10 -1
         
         self.speedIndex = 0
         self.speedTexts = ["Slow", "Medium", "Fast"]
-        self.speeds = [10, 20, 30]
+        self.speeds = [25, 30, 35]
         self.speedText = 'Slow'
-        self.speed = 10
+        self.speed = 25
         
         self.mapIndex = 0
         self.mapTexts = ["Easy", "Medium", "Hard"]
@@ -108,21 +108,22 @@ class Snake_Game():
         self.SnakeUI.convert() # Increase drawing speed
         self.SnakeUI = pygame.transform.scale(self.SnakeUI, (display_width, info_height))
         
+        self.size = 20
         self.RockUI = pygame.image.load("Icon//RockUI.png")
         self.RockUI.convert() 
-        self.RockUI = pygame.transform.scale(self.RockUI, (20, 20))
+        self.RockUI = pygame.transform.scale(self.RockUI, (self.size, self.size))
         
         self.Tree1UI = pygame.image.load("Icon//Tree_ShortUI.png")
         self.Tree1UI.convert() 
-        self.Tree1UI = pygame.transform.scale(self.Tree1UI, (20, 20))
+        self.Tree1UI = pygame.transform.scale(self.Tree1UI, (self.size, self.size))
         
         self.Tree2UI = pygame.image.load("Icon//Tree_UglyUI.png")
         self.Tree2UI.convert() 
-        self.Tree2UI = pygame.transform.scale(self.Tree2UI, (20, 20))
-
+        self.Tree2UI = pygame.transform.scale(self.Tree2UI, (self.size, self.size))
+ 
         self.AppleUI = pygame.image.load("Icon//AppleUI.png")
         self.AppleUI.convert() 
-        self.AppleUI = pygame.transform.scale(self.AppleUI, (20, 20))
+        self.AppleUI = pygame.transform.scale(self.AppleUI, (self.size, self.size))
         
         # Button
         self.buttonWidth = 80
@@ -158,7 +159,7 @@ class Snake_Game():
             self.start_button.draw() 
             self.level_button.draw()
             self.map_button.draw()
-            self.display_info()
+            self.display_info(0)
             
             pygame.display.update()
             
@@ -176,7 +177,7 @@ class Snake_Game():
                     sys.exit()                  # close program
               
             self.display_background()
-            self.display_info()
+            self.display_info(0)
             
             if(time % 250 < 250):
                 self.display_text(countdown)
@@ -231,7 +232,7 @@ class Snake_Game():
             self.display_background()
             self.display_snake(frames.snake_position)
             self.display_apple(frames.apple_position)
-            self.display_info()
+            self.display_info(frames.score)
             
             pygame.display.update()
             clock.tick(self.speed)
@@ -239,7 +240,6 @@ class Snake_Game():
     def generate_snake(self, frames):
         
         snake_head = frames.snake_position[0].copy()
-        
         if frames.button_direction == 1:
             snake_head[0] += 10
         elif frames.button_direction == 0:
@@ -250,10 +250,10 @@ class Snake_Game():
             snake_head[1] -= 10
            
         # collision with apple -----------------------
-        if snake_head == frames.apple_position:
+        if frames.apple_position.collidepoint(snake_head):
             frames.apple_position = self.generate_apple()
             frames.snake_position.insert(0, snake_head)
-            frames.score += 1
+            frames.score += 100
     
         else:
             frames.snake_position.insert(0, snake_head)
@@ -268,31 +268,23 @@ class Snake_Game():
             frames.crashed = True
 
     def generate_apple(self):
-        return [random.randrange(1, self.game_width_index)*10, random.randrange(1, self.game_height_index)*10]
-        
-    def display_snake(self, snake_position):
-        for position in snake_position:
-            pygame.draw.rect(self.display, self.green, pygame.Rect(position[0],position[1], 10, 10))
+        return pygame.Rect(random.randrange(0, self.game_width_index)*10, random.randrange(0, self.game_height_index)*10, self.size, self.size)
     
-    def display_apple(self, apple_position):
-        self.display.blit(self.AppleUI, apple_position)
-        
     def display_background(self):
         self.display.blit(self.GrassUI, (0, 0))
         self.display.blit(self.SnakeUI, (0, self.game_height))
-        self.display.blit(self.RockUI, (20, 20))
-        self.display.blit(self.RockUI, (240, 160))
-        self.display.blit(self.RockUI, (160, 410))
-        self.display.blit(self.RockUI, (180, 120))
         
-        self.display.blit(self.Tree1UI, (280, 120))
-        self.display.blit(self.Tree1UI, (380, 130))
-        self.display.blit(self.Tree2UI, (120, 290))
+    def display_snake(self, snake_position):
+        for position in snake_position:
+            pygame.draw.rect(self.display, self.green, pygame.Rect(position[0], position[1], 10, 10))
+    
+    def display_apple(self, apple_position):
+        self.display.blit(self.AppleUI, apple_position)
 
-    def display_info(self):
+    def display_info(self, score):
         
         # display score
-        TextSurf = self.infoText.render("Score:  " + "0", True, self.white)
+        TextSurf = self.infoText.render("Score:  " + str(score), True, self.white)
         self.display.blit(TextSurf, self.score_text_position)
         
         # display speed
@@ -318,9 +310,25 @@ class Snake_Game():
         self.mapIndex = (self.mapIndex + 1) % 3
 
 class Map():
-    def __init__(self):
+    
+    def __init__(self, display):
+        pass
+    
+    def drawEasy(self):
+        self.display.blit(self.RockUI, (20, 20))
+        self.display.blit(self.RockUI, (240, 160))
+        self.display.blit(self.RockUI, (160, 410))
+        self.display.blit(self.RockUI, (180, 120))
+        
+        self.display.blit(self.Tree1UI, (280, 120))
+        self.display.blit(self.Tree1UI, (380, 130))
+        self.display.blit(self.Tree2UI, (120, 290))
+    def drawMedium(self):
+        pass
+    def drawHard(self):
         pass
         
+    
 if __name__ == "__main__":
     
     #initialize pygame modules   
@@ -332,7 +340,7 @@ if __name__ == "__main__":
     # display game window
     display_width = 420
     display_height = 620
-    info_height = 150
+    info_height = 140
     
     # create the display surface object of specific dimension.
     display = pygame.display.set_mode((display_width, display_height))
