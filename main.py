@@ -22,7 +22,7 @@ class Button:
         # text
         self.buttonText = pygame.font.Font('freesansbold.ttf', 18)
         self.text_surf = self.buttonText.render(text, True, '#FFFFFF')
-        self.text_rect = self.text_surf.get_rect(center = self.top_rect.center)
+        self.text_rect = self.text_surf.get_rect()
         
         # listener
         self.command = command
@@ -79,22 +79,23 @@ class Snake_Game():
         
         # Const 
         self.green = (227, 229, 132)
-        self.black = (0, 0, 0)
         self.white = (255, 255, 255)
         
         self.display = display
         self.display_width = display_width
-        self.display_height = display_height
-        self.info_height = info_height
         self.game_height = display_height - info_height
         self.game_width_index = display_width/10
         self.game_height_index = self.game_height/10
         
         self.speedIndex = 0
-        self.speeds = ["Slow", "Medium", "Fast"]
+        self.speedTexts = ["Slow", "Medium", "Fast"]
+        self.speeds = [10, 20, 30]
+        self.speedText = 'Slow'
+        self.speed = 10
         
         self.mapIndex = 0
-        self.maps = ["Easy", "Medium", "Hard"]
+        self.mapTexts = ["Easy", "Medium", "Hard"]
+
         
         # Font
         self.infoText = pygame.font.Font('freesansbold.ttf', 20)
@@ -131,13 +132,17 @@ class Snake_Game():
         self.level_position = (20, self.game_height + 2*self.pos + self.buttonHeight)
         self.map_position = (20, self.game_height + 3*self.pos + 2*self.buttonHeight)
         self.start_button = Button(self.display, 'START', self.buttonWidth, self.buttonHeight, self.start_position, 5, [self.countdown])
-        self.level_button = Button(self.display, 'SPEED', self.buttonWidth, self.buttonHeight, self.level_position, 5, [self.change_speed])
-        self.map_button = Button(self.display, 'MAP', self.buttonWidth, self.buttonHeight, self.map_position, 5, [self.change_map])
+        self.level_button = Button(self.display, 'SPEED', self.buttonWidth, self.buttonHeight, self.level_position, 5, [self.choose_speed])
+        self.map_button = Button(self.display, 'MAP', self.buttonWidth, self.buttonHeight, self.map_position, 5, [self.choose_map])
 
         # Text Position
-        self.score_position = (40 + self.buttonWidth, self.start_position[1])
-        self.speed_position = (40 + self.buttonWidth, self.level_position[1])
-        self.map_position = (40 + self.buttonWidth, self.map_position[1])
+        self.score_text_position = (40 + self.buttonWidth, self.start_position[1])
+        self.speed_text_position = (40 + self.buttonWidth, self.level_position[1])
+        self.map_text_position = (40 + self.buttonWidth, self.map_position[1])
+        
+        # Obstacle
+        self.obstacle = []
+        
         self.mainUI()
         
     def mainUI(self):
@@ -193,9 +198,8 @@ class Snake_Game():
         
         # initialize snake and apple
         startX = self.display_width/2
-        startY = (self.display_height-self.info_height)/2
-        snake_head = [startX, startY]
-        snake_position = [snake_head, [startX-10, startY],[startX-20, startY]]
+        startY = self.game_height/2
+        snake_position = [[startX, startY], [startX-10, startY],[startX-20, startY]]
         apple_position = self.generate_apple()
         frames = Frames(snake_position, apple_position)
         
@@ -230,7 +234,7 @@ class Snake_Game():
             self.display_info()
             
             pygame.display.update()
-            clock.tick(20)
+            clock.tick(self.speed)
     
     def generate_snake(self, frames):
         
@@ -248,11 +252,11 @@ class Snake_Game():
         # collision with apple -----------------------
         if snake_head == frames.apple_position:
             frames.apple_position = self.generate_apple()
-            frames.snake_position.insert(0, list(snake_head))
+            frames.snake_position.insert(0, snake_head)
             frames.score += 1
     
         else:
-            frames.snake_position.insert(0, list(snake_head))
+            frames.snake_position.insert(0, snake_head)
             frames.snake_position.pop()
         
         # collision with boundaries ----------------------------
@@ -289,15 +293,15 @@ class Snake_Game():
         
         # display score
         TextSurf = self.infoText.render("Score:  " + "0", True, self.white)
-        self.display.blit(TextSurf, self.score_position)
+        self.display.blit(TextSurf, self.score_text_position)
         
         # display speed
-        TextSurf = self.infoText.render("Speed:  " + self.speeds[self.speedIndex], True, self.white)
-        self.display.blit(TextSurf, self.speed_position)
+        TextSurf = self.infoText.render("Speed:  " + self.speedText, True, self.white)
+        self.display.blit(TextSurf, self.speed_text_position)
         
         # display map
-        TextSurf = self.infoText.render("Map:  " + self.maps[self.mapIndex], True, self.white)
-        self.display.blit(TextSurf, self.map_position)
+        TextSurf = self.infoText.render("Map:  " + self.mapTexts[self.mapIndex], True, self.white)
+        self.display.blit(TextSurf, self.map_text_position)
         
     def display_text(self, display_text):
         TextSurf = self.finalText.render(display_text, True, self.white)
@@ -305,11 +309,17 @@ class Snake_Game():
         TextRect.center = ((self.display_width/2),(self.game_height/2))
         self.display.blit(TextSurf, TextRect)
         
-    def change_speed(self):
-        self.speedIndex = (self.speedIndex + 1) % 3    
-            
-    def change_map(self):
+    def choose_speed(self):
+        self.speedIndex = (self.speedIndex + 1) % 3  
+        self.speedText = self.speedTexts[self.speedIndex]
+        self.speed = self.speeds[self.speedIndex]
+          
+    def choose_map(self):
         self.mapIndex = (self.mapIndex + 1) % 3
+
+class Map():
+    def __init__(self):
+        pass
         
 if __name__ == "__main__":
     
