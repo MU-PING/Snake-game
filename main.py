@@ -20,7 +20,7 @@ class Button:
         self.bottom_color = '#354B5E'
 
         # text
-        self.buttonText = pygame.font.Font('freesansbold.ttf', 18)
+        self.buttonText = pygame.font.Font('font.ttf', 14)
         self.text_surf = self.buttonText.render(text, True, '#FFFFFF')
         self.text_rect = self.text_surf.get_rect()
         
@@ -103,8 +103,8 @@ class Snake_Game():
         self.obstacle = self.easyMap()
         
         # Font
-        self.infoText = pygame.font.Font('freesansbold.ttf', 20)
-        self.finalText = pygame.font.Font('freesansbold.ttf', 64)
+        self.infoText = pygame.font.Font('font.ttf', 14)
+        self.finalText = pygame.font.Font('font.ttf', 40)
         
         # Image
         self.GrassUI = pygame.image.load("Icon//GrassUI.png")
@@ -141,9 +141,9 @@ class Snake_Game():
         self.map_button = Button(self.display, 'MAP', self.buttonWidth, self.buttonHeight, self.map_position, 5, [self.choose_map])
 
         # Text Position
-        self.score_text_position = (40 + self.buttonWidth, self.start_position[1])
-        self.speed_text_position = (40 + self.buttonWidth, self.level_position[1])
-        self.map_text_position = (40 + self.buttonWidth, self.map_position[1])
+        self.score_text_position = (40 + self.buttonWidth, self.start_position[1]+3)
+        self.speed_text_position = (40 + self.buttonWidth, self.level_position[1]+3)
+        self.map_text_position = (40 + self.buttonWidth, self.map_position[1]+3)
         
         self.mainUI()
         
@@ -205,8 +205,10 @@ class Snake_Game():
         apple_position = self.generate_apple()
         frames = Frames(snake_position, apple_position)
         
+        FPS = 0
         # frame
         while True:
+            FPS+=1
             for event in pygame.event.get(): 
                 if event.type == pygame.QUIT:
                     pygame.quit()               # close window
@@ -297,15 +299,15 @@ class Snake_Game():
     def display_info(self, score):
         
         # display score
-        TextSurf = self.infoText.render("Score:  " + str(score), True, self.white)
+        TextSurf = self.infoText.render("Score:" + str(score), True, self.white)
         self.display.blit(TextSurf, self.score_text_position)
         
         # display speed
-        TextSurf = self.infoText.render("Speed:  " + self.speedText, True, self.white)
+        TextSurf = self.infoText.render("Speed:" + self.speedText, True, self.white)
         self.display.blit(TextSurf, self.speed_text_position)
         
         # display map
-        TextSurf = self.infoText.render("Map:  " + self.mapText, True, self.white)
+        TextSurf = self.infoText.render("Map:" + self.mapText, True, self.white)
         self.display.blit(TextSurf, self.map_text_position)
         
     def display_text(self, display_text):
@@ -355,8 +357,8 @@ if __name__ == "__main__":
     
     # display game window
     display_width = 420
-    display_height = 620
-    info_height = 140
+    display_height = 610
+    info_height = 130
     
     # create the display surface object of specific dimension.
     display = pygame.display.set_mode((display_width, display_height))
